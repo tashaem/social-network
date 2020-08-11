@@ -1,0 +1,100 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <div class="container">
+        <div class="card profile">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12">
+                        <h4>@{{currentuser.username}}</h4>
+                        <hr>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-3 col-sm-6">
+                        {{currentprofile.following.count}} Following
+                    </div>
+                    <div class="col-lg-5 col-sm-6">
+                        {{currentprofile.follower.count}} Followers
+                    </div>
+                    <div class="col-lg-4">
+                        {% if not personalprofile %}
+                            <form action="{% url 'profile' currentuser.username %}" method="post">
+                                {% csrf_token %}
+                                {% if followed %}
+                                    <button class="btn btn-outline-info btn-sm btn-block" name="unfollowbutton"><b>Unfollow</b></button>
+                                {% else %}
+                                    <button class="btn btn-info btn-sm btn-block" name="followbutton"><b>Follow</b></button>
+                                {% endif %}
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for post in posts %}
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-8">
+                                <h5 class="card-title">@{{currentuser.username}}</h5>
+                            </div>
+
+                            {% if currentuser == request.user %}
+                                <div class="col-4 post">
+                                    <!-- Edit button -->
+                                    <a class="editbtn" data-id="{{post.id}}" name="editbtn">
+                                        <i class="fa" style="font-size:18px;" >&#xf044;</i>
+                                    </a>
+                                </div>
+                            {% endif %}
+
+                        </div>
+                        <div class="row">
+                            <div class="col-12" style="text-align:left;">
+                                <p class="card-text" >
+                                    <span class="postcontent" data-id="{{post.id}}">{{post.content}}</span>
+                                    <br><small>{{post.timestamp}}</small>
+                                </p>
+                                <p>
+                                    <span class="hearts">&hearts;</span> 
+                                    <span class="like-count" data-id="{{post.id}}">
+                                        {% if post.likers == None %}
+                                            0
+                                        {% else %} 
+                                            {{post.likers.count}} 
+                                        {% endif%} 
+                                    </span>
+
+                                    {% if user.is_authenticated %}
+                                        <button class="btn btn-outline-info btn-xs likebtn" data-id="{{post.id}}">
+                                            {% if request.user in post.likers.all %}
+                                                Unlike
+                                            {% else %} 
+                                                Like 
+                                            {% endif%} 
+                                        </button>
+                                    {% endif%} 
+                                </p>
+
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <div class="row pagination">
+                <div class="col-12">
+                    <span class="step-links">
+                        {% if posts.has_previous %}
+                            <a href="?page={{ posts.previous_page_number }}">Previous</a>
+                        {% endif %}
+                        
+                        {% if posts.has_next %}
+                            <a href="?page={{ posts.next_page_number }}" style="align-self: right;">Next</a>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

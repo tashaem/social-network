@@ -1,0 +1,86 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <div class="container">
+        <div class="card">
+            <form action="{% url 'index' %}" method="post" class="newpostform">
+                {% csrf_token %}
+                <div class="form-group">
+                    <textarea class="form-control" id="newpost" rows="3" name="newpost" placeholder="What's up today?"></textarea>
+                </div>
+                <div class="form-group" style="text-align: right;">
+                    <button class="btn btn-outline-dark" name="newpostbutton">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        {% for post in posts %}
+        <div class="card posts">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-8">
+                        <h5 class="card-title"><a class="userlinks" href="{% url 'profile' post.user %}">@{{post.user}}</a></h5>
+                    </div>
+
+                    {% if post.user == request.user %}
+                        <div class="col-4 post">
+                            <!-- Edit button -->
+                            <a class="editbtn" data-id="{{post.id}}" name="editbtn">
+                                <i class="fa" style="font-size:18px;" >&#xf044;</i>
+                            </a>
+                        </div>
+                    {% endif %}
+
+                </div>
+                <div class="row">
+                    <div class="col-12" style="text-align:left;">
+                        <p class="card-text" >
+                            <span class="postcontent" data-id="{{post.id}}">{{post.content}}</span>
+                            <br><small>{{post.timestamp}}</small>
+                        </p>
+                        <p>
+                            <span class="hearts">&hearts;</span> 
+                            <span class="like-count" data-id="{{post.id}}">
+                                {% if post.likers == None %}
+                                    0
+                                {% else %} 
+                                    {{post.likers.count}} 
+                                {% endif%} 
+                            </span>
+                            
+                            {% if user.is_authenticated %}
+                                <button class="btn btn-outline-info btn-xs likebtn" data-id="{{post.id}}">
+                                    {% if request.user in post.likers.all %}
+                                        Unlike
+                                    {% else %} 
+                                        Like 
+                                    {% endif%} 
+                                </button>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <div class="container">
+        <div class="row pagination">
+            <div class="col-12">
+                <span class="step-links">
+                    {% if posts.has_previous %}
+                        <a href="?page={{ posts.previous_page_number }}">Previous</a>
+                    {% endif %}
+                    
+                    {% if posts.has_next %}
+                        <a href="?page={{ posts.next_page_number }}" style="align-self: right;">Next</a>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+{% endblock %}
